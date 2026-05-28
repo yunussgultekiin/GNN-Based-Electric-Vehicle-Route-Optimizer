@@ -12,13 +12,16 @@ Traditional EV routing systems minimize distance or time. This system replaces s
 User Input (Origin → Destination)
          │
          ▼
-  Map Topology (OSM via NetworkX)
+  Map Topology (OSM via OSMnx)
+         │
+         ▼
+  Pure Python Adjacency List
          │
          ▼
   GCN Model → Dynamic Energy Scores per Edge
          │
          ▼
-  Dijkstra (Energy-Weighted Graph)
+  Dijkstra (Energy-Weighted Adjacency List)
          │
          ▼
   Optimal Route + Charging Station Waypoints
@@ -34,23 +37,24 @@ User Input (Origin → Destination)
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                      Frontend                           │
-│   Next.js + Leaflet.js                                  │
+│                 Next.js + Leaflet.js                    │
 └───────────────────┬─────────────────────────────────────┘
                     │ REST / HTTP
 ┌───────────────────▼─────────────────────────────────────┐
-│                   API Gateway                           │
-│   FastAPI                                               │
-└────────┬──────────────────────┬────────────────────────┘
-         │                      │
-┌────────▼──────┐      ┌────────▼──────────────────────┐
-│  AI Service   │      │      Routing Service           │
-│               │      │                                │
-│  PyTorch Geo  │      │  NetworkX + OSM topology       │
-│  GCN Model    │      │  Adjacency List (pure Python)  │
-│  Edge energy  │      │  Priority Queue Dijkstra       │
-│  score infer- │      │  Charging station injector     │
-│  ence API     │      └────────────────────────────────┘
-└───────────────┘
+│                   Backend (FastAPI)                     │
+│                                                         │
+│  ┌──────────────┐   ┌──────────────┐   ┌─────────────┐  │
+│  │  ml/         │   │  routing/    │   │  topology/  │  │
+│  │              │   │              │   │             │  │
+│  │  PyTorch Geo │   │  Adjacency   │   │  OSMnx      │  │
+│  │  GCN Model   │   │  List        │   │  graph      │  │
+│  │  Edge energy │   │  Priority    │   │  downloader │  │
+│  │  inference   │   │  Queue       │   │  & parser   │  │
+│  │              │   │  Dijkstra    │   │             │  │
+│  │              │   │  Charging    │   │             │  │
+│  │              │   │  Injector    │   │             │  │
+│  └──────────────┘   └──────────────┘   └─────────────┘  │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -60,12 +64,23 @@ User Input (Origin → Destination)
 | Layer | Technology |
 |---|---|
 | **Frontend** | Next.js, Leaflet.js |
-| **API Gateway** | FastAPI |
+| **Backend** | FastAPI |
 | **Graph Model** | PyTorch Geometric (PyG) |
-| **Map Topology** | NetworkX, OpenStreetMap (via OSMnx) |
-| **Routing Engine** | Pure Python — Adjacency List + Priority Queue Dijkstra |
+| **Map Data Source** | OpenStreetMap (via OSMnx) |
+| **Graph Structure** | Pure Python — Adjacency List |
+| **Routing Engine** | Pure Python — Priority Queue Dijkstra |
 | **Graph Type** | GCN (Graph Convolutional Network), 2–3 layers |
 | **Local Environment** | Docker, Docker Compose |
+
+---
+
+## Dataset
+
+**[EV Energy Consumption Dataset](https://www.kaggle.com/datasets/ziya07/ev-energy-consumption-dataset/data)** — Kaggle
+
+> Real-time Driving Behavior, Road, Weather & Vehicle Data for Energy Prediction
+
+A comprehensive EV energy consumption dataset combining real-time driving behavior, road conditions, weather, and vehicle data. Used for training the GCN model.
 
 ---
 
@@ -73,30 +88,19 @@ User Input (Origin → Destination)
 
 ### Map Topology Builder
 
-Downloads the road network for the target region via **OSMnx**, converts it into a **NetworkX** directed graph, and serializes it into a pure Python **Adjacency List** data structure. Edge attributes (length, gradient, speed limit, surface type) are extracted at this stage. Dynamic factors (traffic, weather) are injected at inference time.
+Downloads the road network for the target region via **OSMnx**, then converts it into a pure Python **Adjacency List** data structure — OSMnx is used exclusively as a data source, not as a routing backend. Edge attributes (length, gradient, speed limit, surface type) are extracted at this stage. Dynamic factors (traffic, weather) are provided by a mock service at inference time.
 
 ---
 
 ### GCN Energy Score Predictor
 
-A **Graph Convolutional Network** (Kipf & Welling, 2017) that takes road segment features as node/edge attributes and outputs a predicted energy consumption score per edge.
-
-**Node features per road segment:**
-
-| Feature | Description |
-|---|---|
-| `grade_percent` | Road gradient (positive = uphill) |
-| `speed_limit_kph` | Posted speed limit |
-| `surface_encoded` | Road surface type (one-hot) |
-| `traffic_score` | Real-time congestion level [0–1] |
-| `temperature_c` | Ambient temperature (affects battery chemistry) |
-| `precipitation_mm` | Precipitation level (affects rolling resistance) |
+A **Graph Convolutional Network** trained on the EV Energy Consumption Dataset. The model learns the relationship between road segment features and energy consumption, then generalizes to unseen edges at inference time.
 
 ---
 
 ### Energy-Weighted Dijkstra
 
-Dijkstra over the adjacency list where edge weights are **GCN-predicted energy scores** rather than physical distances. Time complexity: **O((V + E) log V)**. Energy weights are injected externally from the AI service, keeping routing logic decoupled from the ML layer.
+Dijkstra over the adjacency list where edge weights are **GCN-predicted energy scores** rather than physical distances. Uses a **min-heap priority queue** (`heapq`) for node selection. Time complexity: **O((V + E) log V)**. Energy weights are injected from the ML module, keeping routing logic decoupled from the model layer.
 
 ---
 
@@ -106,20 +110,25 @@ After computing the optimal path, validates whether the total predicted energy c
 
 ---
 
+### Mock Dynamic Feature Service
+
+A lightweight service that generates realistic dynamic feature values at inference time: traffic density, ambient temperature, wind speed, and weather condition. Decouples the routing pipeline from external API dependencies.
+
+---
+
 ## Data Flow
 
 ```
 1. User selects origin & destination on Leaflet map
-2. Frontend POST /route/optimal → API Gateway
-3. Gateway fetches map topology for bounding box (cached)
-4. Gateway POST /predict/energy-scores → AI Service
-   ├── AI Service assembles PyG graph with live dynamic features
-   └── GCN forward pass → energy score per edge → returned
-5. Gateway passes scored graph to Routing Service
-6. Routing Service runs energy-weighted Dijkstra
-7. Charging injector validates battery range; inserts stops if needed
-8. Final route (coordinates + metadata) returned to frontend
-9. Leaflet renders polyline, charging stop markers, energy breakdown
+2. Frontend POST /route/optimal → Backend API
+3. Backend builds adjacency list from cached OSMnx topology
+4. Mock service injects dynamic features (traffic, weather, wind)
+5. GCN forward pass over road graph → energy score per edge
+6. Energy scores injected as edge weights into adjacency list
+7. Priority queue Dijkstra finds minimum energy path
+8. Charging injector validates battery range; inserts stops if needed
+9. Final route (coordinates + metadata) returned to frontend
+10. Leaflet renders polyline, charging stop markers, energy breakdown
 ```
 
 ---
@@ -156,6 +165,4 @@ docker-compose up --build
 | Service | URL |
 |---|---|
 | Frontend | http://localhost:3000 |
-| API Gateway | http://localhost:8000 |
-| AI Service | http://localhost:8001 |
-| Routing Service | http://localhost:8002 |
+| Backend  | http://localhost:8000 |
