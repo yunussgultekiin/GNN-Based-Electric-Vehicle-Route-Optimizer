@@ -19,6 +19,17 @@ export function getWeatherIcon(condition: WeatherCondition): string {
   return iconMap[condition];
 }
 
+export function getWeatherLabel(condition: WeatherCondition): string {
+  const labelMap: Record<WeatherCondition, string> = {
+    sunny: "Güneşli",
+    cloudy: "Bulutlu",
+    rainy: "Yağmurlu",
+    snowy: "Karlı",
+  };
+
+  return labelMap[condition];
+}
+
 export function getInitialConditions(): InitialConditions {
   return {
     temperature_c: 18,

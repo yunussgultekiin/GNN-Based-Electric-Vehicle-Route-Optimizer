@@ -3,6 +3,7 @@
 import {
   getTrafficDensityLevel,
   getWeatherIcon,
+  getWeatherLabel,
   type InitialConditions,
 } from "@/lib/conditions";
 import type { RouteResponse } from "@/types/route";
@@ -34,9 +35,7 @@ export default function ConditionsPanel({
       <div className="mt-4 space-y-3 text-sm">
         <div className="flex items-center justify-between">
           <span className="text-zinc-400">Sıcaklık</span>
-          <span className="font-semibold">
-            {conditions.temperature_c}°C
-          </span>
+          <span className="font-semibold">{conditions.temperature_c}°C</span>
         </div>
 
         <div className="flex items-center justify-between">
@@ -48,8 +47,8 @@ export default function ConditionsPanel({
 
         <div className="flex items-center justify-between">
           <span className="text-zinc-400">Hava</span>
-          <span className="font-semibold capitalize">
-            {conditions.weather_condition}
+          <span className="font-semibold">
+            {getWeatherLabel(conditions.weather_condition)}
           </span>
         </div>
 

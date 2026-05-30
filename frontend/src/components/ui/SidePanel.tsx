@@ -51,7 +51,7 @@ function IstanbulClock() {
 
   return (
     <div className="border-t border-white/10 pt-4 text-xs text-zinc-400">
-      <div className="text-zinc-500">Europe/Istanbul</div>
+      <div className="text-zinc-500">İstanbul Saati</div>
       <div className="mt-1 font-mono text-zinc-200">{formattedDateTime}</div>
     </div>
   );
@@ -113,7 +113,7 @@ export default function SidePanel({
               : "border-white/10 bg-white/5 hover:bg-white/10"
           }`}
         >
-          <span className="block text-xs text-zinc-400">Origin</span>
+          <span className="block text-xs text-zinc-400">Başlangıç</span>
           <span className="mt-1 block text-sm font-semibold">
             {originNode ? originNode.label : "Haritadan başlangıç seç"}
           </span>
@@ -128,7 +128,7 @@ export default function SidePanel({
               : "border-white/10 bg-white/5 hover:bg-white/10"
           }`}
         >
-          <span className="block text-xs text-zinc-400">Destination</span>
+          <span className="block text-xs text-zinc-400">Varış</span>
           <span className="mt-1 block text-sm font-semibold">
             {destinationNode ? destinationNode.label : "Haritadan varış seç"}
           </span>
@@ -199,11 +199,11 @@ export default function SidePanel({
 
         {optimalRoute && directRoute && (
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <h2 className="text-sm font-semibold">Route Stats</h2>
+            <h2 className="text-sm font-semibold">Rota İstatistikleri</h2>
 
             <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
               <div className="rounded-xl border border-green-400/20 bg-green-400/10 p-3">
-                <div className="text-green-300">Optimal</div>
+                <div className="text-green-300">Optimize Rota</div>
                 <div className="mt-2 font-semibold">
                   {formatNumber(optimalRoute.total_energy_wh)} Wh
                 </div>
@@ -213,7 +213,7 @@ export default function SidePanel({
               </div>
 
               <div className="rounded-xl border border-red-400/20 bg-red-400/10 p-3">
-                <div className="text-red-300">Direct</div>
+                <div className="text-red-300">Direkt Rota</div>
                 <div className="mt-2 font-semibold">
                   {formatNumber(directRoute.total_energy_wh)} Wh
                 </div>
