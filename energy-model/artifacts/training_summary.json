@@ -1,0 +1,39 @@
+{
+  "best_epoch": 600,
+  "val_mse": 0.8908,
+  "val_mae": 0.7473,
+  "test_mse": 0.9527,
+  "test_mae": 0.7865,
+  "test_rmse": 0.9761,
+  "target_mean_kwh": 8.4478,
+  "rmse_pct": 11.6,
+  "feature_dim": 17,
+  "hidden_channels": 64,
+  "num_layers": 2,
+  "dropout": 0.2,
+  "feature_cols": [
+    "length",
+    "gradient",
+    "temperature",
+    "wind_speed",
+    "speed_kmh",
+    "battery_soc",
+    "acceleration",
+    "surface_type",
+    "traffic_density",
+    "weather_condition",
+    "gradient_sq",
+    "length_x_gradient",
+    "cold_penalty",
+    "wind_speed_sq",
+    "speed_sq",
+    "power_proxy",
+    "speed_x_length"
+  ],
+  "knn_graph_cols": [
+    "speed_kmh",
+    "length",
+    "gradient"
+  ],
+  "best_model_path": "../artifacts/best_model.pt"
+}
