@@ -61,22 +61,18 @@ function getEdgeMiddlePoint(edgeGeometry: { lat: number; lon: number }[]) {
 function createChargingIcon() {
   return L.divIcon({
     className: "charging-node-icon",
-    html: `<div class="text-lg">⚡</div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
+    html: `<div style="font-size:18px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 0 8px #f5c518);">⚡</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
   });
 }
 
 function createRouteChargingIcon() {
   return L.divIcon({
     className: "route-charging-stop-icon",
-    html: `
-      <div class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-yellow-200 bg-yellow-300 text-2xl shadow-[0_0_18px_rgba(250,204,21,0.95)]">
-        ⚡
-      </div>
-    `,
-    iconSize: [40, 40],
-    iconAnchor: [20, 20],
+    html: `<div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:rgba(245,197,24,0.2);border:2px solid #f5c518;border-radius:50%;font-size:20px;box-shadow:0 0 16px rgba(245,197,24,0.5),0 0 4px rgba(245,197,24,0.8);">⚡</div>`,
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
   });
 }
 
@@ -85,23 +81,10 @@ function createDistanceLabel(
   isVisible: boolean,
   energyWh?: number
 ) {
+  const display = isVisible ? "inline-flex" : "none";
   const html = energyWh
-    ? `<div class="${
-        isVisible ? "block" : "hidden"
-      } whitespace-nowrap rounded bg-neutral-900/90 px-1.5 py-0.5 text-[10px] shadow">
-          <span class="text-neutral-400 line-through">${Math.round(
-            distance
-          )} m</span>
-          <span class="mx-1 text-neutral-500">→</span>
-          <span class="font-semibold text-green-400">${Math.round(
-            energyWh
-          )} Wh</span>
-        </div>`
-    : `<div class="${
-        isVisible ? "block" : "hidden"
-      } whitespace-nowrap rounded bg-neutral-800/80 px-1.5 py-0.5 text-[10px] text-neutral-300 shadow">${Math.round(
-        distance
-      )} m</div>`;
+    ? `<div style="display:${display};background:rgba(9,9,11,0.9);border:1px solid #27272a;border-radius:5px;padding:2px 7px;font-size:10px;font-family:monospace;white-space:nowrap;gap:5px;align-items:center;"><span style="color:#52525b;text-decoration:line-through;">${Math.round(distance)} m</span><span style="color:#00e676;font-weight:700;">${Math.round(energyWh)} Wh</span></div>`
+    : `<div style="display:${isVisible ? "block" : "none"};background:rgba(9,9,11,0.9);border:1px solid #27272a;color:#71717a;font-size:10px;font-family:monospace;border-radius:5px;padding:2px 6px;white-space:nowrap;">${Math.round(distance)} m</div>`;
 
   return L.divIcon({
     className: "edge-distance-label",
@@ -248,10 +231,12 @@ export default function MapCanvas({
       zoom={14}
       scrollWheelZoom
       className="h-full w-full"
+      style={{ cursor: activeField !== null ? "crosshair" : "grab" }}
     >
       <TileLayer
         attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap contributors'
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        opacity={0.75}
       />
 
       <ZoomLabelController onZoomVisibilityChange={setLabelsVisible} />
@@ -377,7 +362,7 @@ export default function MapCanvas({
               opacity: isDisabledForDestination ? 0.35 : 1,
             }}
           >
-            <Tooltip direction="top" offset={[0, -8]}>
+            <Tooltip permanent={true} direction="top" offset={[0, -10]}>
               {node.label}
               {isOrigin ? " — Origin" : ""}
               {isDestination ? " — Destination" : ""}
