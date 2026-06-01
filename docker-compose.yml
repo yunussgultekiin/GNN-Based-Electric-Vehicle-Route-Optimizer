@@ -1,0 +1,36 @@
+
+services:
+  energy-model:
+    build: 
+      context: ./energy-model
+      # (Yunus'un yazdığı ML servisinin Dockerfile'ı energy-model altında olmalı)
+    container_name: ev_energy_model
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+
+  backend:
+    build: 
+      context: ./backend
+    container_name: ev_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      # OSMnx harita verisinin her seferinde silinmemesi için volume bağlıyoruz
+      - ./backend/data:/app/data
+    depends_on:
+      - energy-model
+    restart: unless-stopped
+
+  frontend:
+    build: 
+      context: ./frontend
+      # (Next.js için Dockerfile frontend altında olmalı)
+    container_name: ev_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped

@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+osmnx
+networkx
+numpy
+pydantic
+pydantic-settings
+httpx
+scikit-learn

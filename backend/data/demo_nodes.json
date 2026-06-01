@@ -1,0 +1,17 @@
+[
+  {"id": 1, "osm_node_id": null, "lat": 40.9901, "lon": 29.0202, "name": "Moda Sahil", "type": "normal"},
+  {"id": 2, "osm_node_id": null, "lat": 40.9923, "lon": 29.0254, "name": "Kadıköy İskele", "type": "charging"},
+  {"id": 3, "osm_node_id": null, "lat": 40.9885, "lon": 29.0311, "name": "Boğa Heykeli", "type": "normal"},
+  {"id": 4, "osm_node_id": null, "lat": 40.9856, "lon": 29.0355, "name": "Söğütlüçeşme Marmaray", "type": "normal"},
+  {"id": 5, "osm_node_id": null, "lat": 40.9821, "lon": 29.0402, "name": "Fenerbahçe Şükrü Saracoğlu", "type": "normal"},
+  {"id": 6, "osm_node_id": null, "lat": 40.9789, "lon": 29.0456, "name": "Kalamış Marina", "type": "charging"},
+  {"id": 7, "osm_node_id": null, "lat": 40.9754, "lon": 29.0512, "name": "Fenerbahçe Parkı", "type": "normal"},
+  {"id": 8, "osm_node_id": null, "lat": 40.9721, "lon": 29.0566, "name": "Caddebostan Sahil", "type": "normal"},
+  {"id": 9, "osm_node_id": null, "lat": 40.9698, "lon": 29.0621, "name": "Caddebostan Migros", "type": "charging"},
+  {"id": 10, "osm_node_id": null, "lat": 40.9675, "lon": 29.0689, "name": "Şaşkınbakkal", "type": "normal"},
+  {"id": 11, "osm_node_id": null, "lat": 40.9642, "lon": 29.0754, "name": "Suadiye", "type": "normal"},
+  {"id": 12, "osm_node_id": null, "lat": 40.9611, "lon": 29.0812, "name": "Bostancı Gösteri Merkezi", "type": "charging"},
+  {"id": 13, "osm_node_id": null, "lat": 40.9583, "lon": 29.0901, "name": "Bostancı İskele", "type": "normal"},
+  {"id": 14, "osm_node_id": null, "lat": 40.9631, "lon": 29.1005, "name": "Kozyatağı Metro", "type": "normal"},
+  {"id": 15, "osm_node_id": null, "lat": 40.9705, "lon": 29.0956, "name": "Sahrayıcedit", "type": "charging"}
+]
