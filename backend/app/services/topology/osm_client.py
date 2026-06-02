@@ -11,7 +11,7 @@ def download_and_cache_graph(place_name: str = "Maltepe, Istanbul, Turkey", file
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     filepath = CACHE_DIR / filename
 
-    logger.info(f"OSMnx üzerinden '{place_name}' indiriliyor, bu işlem birkaç dakika sürebilir...")
+    logger.info(f"Downloading '{place_name}' via OSMnx, this may take a few minutes...")
 
     G = ox.graph_from_place(place_name, network_type="drive")
     G = ox.add_edge_speeds(G)
@@ -20,5 +20,5 @@ def download_and_cache_graph(place_name: str = "Maltepe, Istanbul, Turkey", file
     with open(filepath, "wb") as f:
         pickle.dump(G, f)
 
-    logger.info(f"Graf başarıyla indirildi ve {filepath} konumuna kaydedildi.")
+    logger.info(f"Graph downloaded successfully and saved to {filepath}.")
     return G

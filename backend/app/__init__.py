@@ -8,5 +8,5 @@ app.include_router(demo_router)
 
 @app.get("/")
 async def root():
-    logger.info("Root endpoint'ine istek geldi.")
-    return {"message": "API çalışıyor."}
+    logger.info("A request has arrived at the root endpoint.")
+    return {"message": "API is working."}

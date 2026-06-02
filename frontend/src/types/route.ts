@@ -1,69 +1,62 @@
-export type Coordinate = {
-    lat: number;
-    lon: number;
-  };
-  
-  export type GlobalConditions = {
-    traffic_density: number;
-    ambient_temperature_c: number;
-    wind_speed_kmh: number;
-    weather_condition: "clear" | "rain" | "snow" | "fog" | "cloudy";
-  };
-  
-  export type ChargingStop = {
-    id: string;
-    name: string;
-    coordinate: Coordinate;
-    estimated_charging_time_min: number;
-    connector_type?: string;
-  };
-  
-  export type EdgeEnergyLabel = {
-    edge_id: string;
-    from_node_id: string;
-    to_node_id: string;
-    energy_wh: number;
-    traffic_density: number;
-    gradient_percent?: number;
-  };
-  
-  export type RouteRequest = {
-    origin: Coordinate;
-    destination: Coordinate;
-    battery_capacity_wh: number;
-    current_battery_wh: number;
-    vehicle_model?: string;
-    global_conditions?: GlobalConditions;
-  };
-  
-  export type RouteResponse = {
-    route_id: string;
-    coordinates: Coordinate[];
-    total_distance_m: number;
-    total_energy_wh: number;
-    estimated_duration_min: number;
-    avg_traffic_density: number;
-    charging_stops: ChargingStop[];
-    edge_energy_labels: EdgeEnergyLabel[];
-    warnings: string[];
-  };
-  
-  export type DemoNode = {
-    id: string;
-    label: string;
-    type: "normal" | "charging";
-    coordinate: Coordinate;
-  };
-  
-  export type DemoEdge = {
-    id: string;
-    from_node_id: string;
-    to_node_id: string;
-    distance_m: number;
-    geometry: Coordinate[];
-  };
-  
-  export type DemoGraph = {
-    nodes: DemoNode[];
-    edges: DemoEdge[];
-  };
+export type GlobalConditions = {
+  temperature: number;
+  wind_speed: number;
+  weather_condition: number;
+};
+
+export type ChargingStop = {
+  node_id: number;
+  lat: number;
+  lon: number;
+  name: string;
+};
+
+export type EdgeEnergyLabel = {
+  edge_id: string;
+  length_km: number;
+  energy_kwh: number;
+};
+
+export type RouteRequest = {
+  origin_node_id: number;
+  dest_node_id: number;
+  battery_range_wh: number;
+  battery_soc?: number;
+};
+
+export type RouteWarning = {
+  code: string;
+  params?: Record<string, unknown>;
+};
+
+export type RouteResponse = {
+  coordinates: number[][];
+  route_edge_ids?: string[];
+  edge_energy_labels: EdgeEnergyLabel[];
+  total_energy_wh: number;
+  distance_m: number;
+  charging_stops: ChargingStop[];
+  avg_traffic_density: number;
+  global_conditions: GlobalConditions;
+  warnings: RouteWarning[];
+};
+
+export type DemoNode = {
+  id: number;
+  lat: number;
+  lon: number;
+  name: string;
+  type: "normal" | "charging";
+};
+
+export type DemoEdge = {
+  source: number;
+  target: number;
+  length_km: number;
+  geometry: number[][];
+};
+
+export type DemoGraph = {
+  nodes: DemoNode[];
+  edges: DemoEdge[];
+};

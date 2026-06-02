@@ -6,7 +6,6 @@ from app.core.logging import logger
 from app.services.topology.osm_client import download_and_cache_graph
 
 CACHE_DIR = Path(settings.GRAPH_CACHE_DIR)
-
 SURFACE_MAP: dict[str, int] = {"asphalt": 1, "paved": 1, "cobblestone": 2, "unpaved": 3}
 
 class TopologyService:
@@ -18,11 +17,11 @@ class TopologyService:
 
     def load_graph(self) -> nx.MultiDiGraph:
         if self.filepath.exists():
-            logger.info(f"Graf cache'den yükleniyor: {self.filepath}")
+            logger.info(f"Loading graph from cache: {self.filepath}")
             with open(self.filepath, "rb") as f:
                 self.graph = pickle.load(f)
         else:
-            logger.info("Cache bulunamadı. OSM client tetikleniyor...")
+            logger.info("Cache not found. Triggering OSM client...")
             self.graph = download_and_cache_graph(self.place_name, self.filename)
         return self.graph
 

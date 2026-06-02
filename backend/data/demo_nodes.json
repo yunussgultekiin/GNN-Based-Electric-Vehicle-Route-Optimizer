@@ -1,17 +1,202 @@
 [
-  {"id": 1, "osm_node_id": null, "lat": 40.9901, "lon": 29.0202, "name": "Moda Sahil", "type": "normal"},
-  {"id": 2, "osm_node_id": null, "lat": 40.9923, "lon": 29.0254, "name": "Kadıköy İskele", "type": "charging"},
-  {"id": 3, "osm_node_id": null, "lat": 40.9885, "lon": 29.0311, "name": "Boğa Heykeli", "type": "normal"},
-  {"id": 4, "osm_node_id": null, "lat": 40.9856, "lon": 29.0355, "name": "Söğütlüçeşme Marmaray", "type": "normal"},
-  {"id": 5, "osm_node_id": null, "lat": 40.9821, "lon": 29.0402, "name": "Fenerbahçe Şükrü Saracoğlu", "type": "normal"},
-  {"id": 6, "osm_node_id": null, "lat": 40.9789, "lon": 29.0456, "name": "Kalamış Marina", "type": "charging"},
-  {"id": 7, "osm_node_id": null, "lat": 40.9754, "lon": 29.0512, "name": "Fenerbahçe Parkı", "type": "normal"},
-  {"id": 8, "osm_node_id": null, "lat": 40.9721, "lon": 29.0566, "name": "Caddebostan Sahil", "type": "normal"},
-  {"id": 9, "osm_node_id": null, "lat": 40.9698, "lon": 29.0621, "name": "Caddebostan Migros", "type": "charging"},
-  {"id": 10, "osm_node_id": null, "lat": 40.9675, "lon": 29.0689, "name": "Şaşkınbakkal", "type": "normal"},
-  {"id": 11, "osm_node_id": null, "lat": 40.9642, "lon": 29.0754, "name": "Suadiye", "type": "normal"},
-  {"id": 12, "osm_node_id": null, "lat": 40.9611, "lon": 29.0812, "name": "Bostancı Gösteri Merkezi", "type": "charging"},
-  {"id": 13, "osm_node_id": null, "lat": 40.9583, "lon": 29.0901, "name": "Bostancı İskele", "type": "normal"},
-  {"id": 14, "osm_node_id": null, "lat": 40.9631, "lon": 29.1005, "name": "Kozyatağı Metro", "type": "normal"},
-  {"id": 15, "osm_node_id": null, "lat": 40.9705, "lon": 29.0956, "name": "Sahrayıcedit", "type": "charging"}
+  {
+    "id": 1,
+    "osm_node_id": 1535975519,
+    "lat": 40.9510395,
+    "lon": 29.1237521,
+    "name": "Küçükyalı Kuzey",
+    "type": "normal"
+  },
+  {
+    "id": 2,
+    "osm_node_id": 2368211594,
+    "lat": 40.9489709,
+    "lon": 29.1225557,
+    "name": "Küçükyalı Metro",
+    "type": "normal"
+  },
+  {
+    "id": 3,
+    "osm_node_id": 1514446279,
+    "lat": 40.9529072,
+    "lon": 29.1375335,
+    "name": "Başıbüyük Yolu",
+    "type": "normal"
+  },
+  {
+    "id": 4,
+    "osm_node_id": 661034747,
+    "lat": 40.9489018,
+    "lon": 29.1329105,
+    "name": "Turgut Özal Bulvarı K.",
+    "type": "normal"
+  },
+  {
+    "id": 5,
+    "osm_node_id": 6968144704,
+    "lat": 40.9459378,
+    "lon": 29.1387286,
+    "name": "Başıbüyük Yolu Güney",
+    "type": "normal"
+  },
+  {
+    "id": 6,
+    "osm_node_id": 1532751701,
+    "lat": 40.9444473,
+    "lon": 29.144411,
+    "name": "Zümrütevler Kuzey",
+    "type": "normal"
+  },
+  {
+    "id": 7,
+    "osm_node_id": 807799311,
+    "lat": 40.9454819,
+    "lon": 29.1521636,
+    "name": "Zümrütevler Orta",
+    "type": "normal"
+  },
+  {
+    "id": 8,
+    "osm_node_id": 1514398849,
+    "lat": 40.9419739,
+    "lon": 29.1677712,
+    "name": "Gülensu Batı",
+    "type": "normal"
+  },
+  {
+    "id": 9,
+    "osm_node_id": 1514399725,
+    "lat": 40.9411053,
+    "lon": 29.1612765,
+    "name": "Gülensu Kuzey",
+    "type": "normal"
+  },
+  {
+    "id": 10,
+    "osm_node_id": 661035076,
+    "lat": 40.9358503,
+    "lon": 29.139024,
+    "name": "Maltepe Metro",
+    "type": "normal"
+  },
+  {
+    "id": 11,
+    "osm_node_id": 1531121273,
+    "lat": 40.9383926,
+    "lon": 29.1577142,
+    "name": "Gülensu Orta",
+    "type": "normal"
+  },
+  {
+    "id": 12,
+    "osm_node_id": 807799245,
+    "lat": 40.937827,
+    "lon": 29.1409006,
+    "name": "Başöğretmen Cad.",
+    "type": "normal"
+  },
+  {
+    "id": 13,
+    "osm_node_id": 2232890388,
+    "lat": 40.93664,
+    "lon": 29.1537108,
+    "name": "Zümrütevler Güney",
+    "type": "normal"
+  },
+  {
+    "id": 14,
+    "osm_node_id": 1514400185,
+    "lat": 40.9348838,
+    "lon": 29.1610418,
+    "name": "Gülsuyu Kuzey",
+    "type": "normal"
+  },
+  {
+    "id": 15,
+    "osm_node_id": 2232993035,
+    "lat": 40.9342829,
+    "lon": 29.1474265,
+    "name": "Tülin Caddesi",
+    "type": "normal"
+  },
+  {
+    "id": 16,
+    "osm_node_id": 2232890246,
+    "lat": 40.932754,
+    "lon": 29.1509562,
+    "name": "Altayçeşme",
+    "type": "normal"
+  },
+  {
+    "id": 17,
+    "osm_node_id": 6438269313,
+    "lat": 40.9297492,
+    "lon": 29.1462708,
+    "name": "Huzurevi Metro",
+    "type": "normal"
+  },
+  {
+    "id": 18,
+    "osm_node_id": 1514400916,
+    "lat": 40.9294233,
+    "lon": 29.1638815,
+    "name": "Kazım Karabekir Cad.",
+    "type": "normal"
+  },
+  {
+    "id": 19,
+    "osm_node_id": 2364109124,
+    "lat": 40.9234747,
+    "lon": 29.1551769,
+    "name": "Gülsuyu Metro",
+    "type": "normal"
+  },
+  {
+    "id": 20,
+    "osm_node_id": 7660498230,
+    "lat": 40.9204455,
+    "lon": 29.1657722,
+    "name": "Esenkent Metro",
+    "type": "normal"
+  },
+  {
+    "id": 21,
+    "osm_node_id": 1532751835,
+    "lat": 40.9493873,
+    "lon": 29.1202761,
+    "name": "Şarj — Küçükyalı",
+    "type": "charging"
+  },
+  {
+    "id": 22,
+    "osm_node_id": 2232993075,
+    "lat": 40.9357208,
+    "lon": 29.1368408,
+    "name": "Şarj — Maltepe Metro",
+    "type": "charging"
+  },
+  {
+    "id": 23,
+    "osm_node_id": 2358087822,
+    "lat": 40.9203026,
+    "lon": 29.1362093,
+    "name": "Şarj — Marmaray",
+    "type": "charging"
+  },
+  {
+    "id": 24,
+    "osm_node_id": 1572773107,
+    "lat": 40.9309586,
+    "lon": 29.170589,
+    "name": "Şarj — Bağlarbaşı",
+    "type": "charging"
+  },
+  {
+    "id": 25,
+    "osm_node_id": 11960072344,
+    "lat": 40.9207352,
+    "lon": 29.1647779,
+    "name": "Şarj — Esenkent",
+    "type": "charging"
+  }
 ]

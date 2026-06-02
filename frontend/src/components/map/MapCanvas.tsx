@@ -12,7 +12,7 @@ import {
   useMap,
   useMapEvents,
 } from "react-leaflet";
-import L from "leaflet";
+import L, { type LatLngBoundsExpression } from "leaflet";
 
 import { fetchDemoGraph } from "@/lib/api";
 import { findNearestNode } from "@/lib/map_utils";
@@ -25,7 +25,6 @@ import type {
 } from "@/types/route";
 
 const MALTEPE_CENTER: [number, number] = [40.9369, 29.1556];
-
 type ActiveField = "origin" | "destination" | null;
 
 type MapCanvasProps = {
@@ -34,6 +33,8 @@ type MapCanvasProps = {
   destinationNode: DemoNode | null;
   optimalRoute: RouteResponse | null;
   directRoute: RouteResponse | null;
+  showOptimalRoute: boolean;
+  showDirectRoute: boolean;
   isLoading: boolean;
   onSelectOrigin: (node: DemoNode) => void;
   onSelectDestination: (node: DemoNode) => void;
@@ -49,49 +50,86 @@ type MapClickHandlerProps = {
   onSelectDestination: (node: DemoNode) => void;
 };
 
-function toLatLng(coordinate: { lat: number; lon: number }): [number, number] {
-  return [coordinate.lat, coordinate.lon];
-}
-
-function getEdgeMiddlePoint(edgeGeometry: { lat: number; lon: number }[]) {
-  const middleIndex = Math.floor(edgeGeometry.length / 2);
-  return edgeGeometry[middleIndex];
+function getEdgeMiddlePoint(geometry: number[][]): [number, number] {
+  const mid = geometry[Math.floor(geometry.length / 2)];
+  return [mid[0], mid[1]];
 }
 
 function createChargingIcon() {
   return L.divIcon({
     className: "charging-node-icon",
-    html: `<div style="font-size:18px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 0 8px #f5c518);">⚡</div>`,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
+    html: `<div style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:rgba(246,196,49,0.18);border:1px solid rgba(246,196,49,0.75);border-radius:999px;color:#f6c431;font-size:16px;box-shadow:0 0 18px rgba(246,196,49,0.5);">⚡</div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+  });
+}
+
+function createNearestChargingIcon() {
+  return L.divIcon({
+    className: "charging-node-icon-nearest",
+    html: `<div style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:rgba(239,68,68,0.20);border:2px solid rgba(239,68,68,0.90);border-radius:999px;color:#f6c431;font-size:17px;box-shadow:0 0 0 7px rgba(239,68,68,0.15),0 0 28px rgba(239,68,68,0.55);">⚡</div>`,
+    iconSize: [38, 38],
+    iconAnchor: [19, 19],
   });
 }
 
 function createRouteChargingIcon() {
   return L.divIcon({
     className: "route-charging-stop-icon",
-    html: `<div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:rgba(245,197,24,0.2);border:2px solid #f5c518;border-radius:50%;font-size:20px;box-shadow:0 0 16px rgba(245,197,24,0.5),0 0 4px rgba(245,197,24,0.8);">⚡</div>`,
-    iconSize: [44, 44],
-    iconAnchor: [22, 22],
+    html: `<div style="width:42px;height:42px;display:flex;align-items:center;justify-content:center;background:rgba(246,196,49,0.24);border:2px solid #f6c431;border-radius:50%;font-size:19px;box-shadow:0 0 22px rgba(246,196,49,0.75),0 0 5px rgba(255,255,255,0.7);">⚡</div>`,
+    iconSize: [42, 42],
+    iconAnchor: [21, 21],
   });
 }
 
 function createDistanceLabel(
-  distance: number,
+  distanceM: number,
   isVisible: boolean,
-  energyWh?: number
+  energyKwh?: number
 ) {
+  const energyWh = energyKwh !== undefined ? energyKwh * 1000 : undefined;
   const display = isVisible ? "inline-flex" : "none";
-  const html = energyWh
-    ? `<div style="display:${display};background:rgba(9,9,11,0.9);border:1px solid #27272a;border-radius:5px;padding:2px 7px;font-size:10px;font-family:monospace;white-space:nowrap;gap:5px;align-items:center;"><span style="color:#52525b;text-decoration:line-through;">${Math.round(distance)} m</span><span style="color:#00e676;font-weight:700;">${Math.round(energyWh)} Wh</span></div>`
-    : `<div style="display:${isVisible ? "block" : "none"};background:rgba(9,9,11,0.9);border:1px solid #27272a;color:#71717a;font-size:10px;font-family:monospace;border-radius:5px;padding:2px 6px;white-space:nowrap;">${Math.round(distance)} m</div>`;
+  const html =
+    energyWh !== undefined
+      ? `<div style="display:${display};background:rgba(0,0,0,0.75);border:1px solid rgba(0,245,159,0.3);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600;font-family:monospace;white-space:nowrap;gap:6px;align-items:center;box-shadow:0 0 12px rgba(0,245,159,0.18);backdrop-filter:blur(10px);"><span style="color:white;text-decoration:line-through;">${Math.round(distanceM)} m</span><span style="color:#00f59f;">${Math.round(energyWh)} Wh</span></div>`
+      : `<div style="display:${isVisible ? "block" : "none"};background:rgba(0,0,0,0.75);border:1px solid rgba(255,255,255,0.11);color:white;font-size:13px;font-weight:600;font-family:monospace;border-radius:10px;padding:8px 12px;white-space:nowrap;backdrop-filter:blur(10px);">${Math.round(distanceM)} m</div>`;
 
   return L.divIcon({
     className: "edge-distance-label",
     html,
-    iconSize: energyWh ? [110, 22] : [44, 18],
-    iconAnchor: energyWh ? [55, 11] : [22, 9],
+    iconSize: energyWh !== undefined ? [160, 36] : [90, 36],
+    iconAnchor: energyWh !== undefined ? [80, 18] : [45, 18],
   });
+}
+
+function getEdgeId(edge: DemoEdge): string {
+  return `${edge.source}_${edge.target}`;
+}
+
+function findEdgeById(demoGraph: DemoGraph, edgeId: string): DemoEdge | undefined {
+  const [source, target] = edgeId.split("_").map(Number);
+  return (
+    demoGraph.edges.find((e) => e.source === source && e.target === target) ??
+    demoGraph.edges.find((e) => e.source === target && e.target === source)
+  );
+}
+
+function getRouteEdges(route: RouteResponse | null, demoGraph: DemoGraph | null): DemoEdge[] {
+  if (!route || !demoGraph || !route.route_edge_ids) {
+    return [];
+  }
+
+  return route.route_edge_ids
+    .map((edgeId) => findEdgeById(demoGraph, edgeId))
+    .filter((edge): edge is DemoEdge => Boolean(edge));
+}
+
+function getEnergyLabelForEdge(
+  edge: DemoEdge,
+  energyLabels: EdgeEnergyLabel[]
+): EdgeEnergyLabel | undefined {
+  const edgeId = getEdgeId(edge);
+  return energyLabels.find((label) => label.edge_id === edgeId);
 }
 
 function ZoomLabelController({
@@ -103,7 +141,7 @@ function ZoomLabelController({
 
   useEffect(() => {
     const updateVisibility = () => {
-      onZoomVisibilityChange(map.getZoom() >= 14);
+      onZoomVisibilityChange(map.getZoom() >= 15);
     };
 
     updateVisibility();
@@ -120,26 +158,45 @@ function ZoomLabelController({
 function FitBoundsController({
   originNode,
   destinationNode,
+  optimalRoute,
+  directRoute,
+  showOptimalRoute,
+  showDirectRoute,
 }: {
   originNode: DemoNode | null;
   destinationNode: DemoNode | null;
+  optimalRoute: RouteResponse | null;
+  directRoute: RouteResponse | null;
+  showOptimalRoute: boolean;
+  showDirectRoute: boolean;
 }) {
   const map = useMap();
 
   useEffect(() => {
-    if (!originNode || !destinationNode) {
+    const points: [number, number][] = [];
+
+    if (originNode) {
+      points.push([originNode.lat, originNode.lon]);
+    }
+
+    if (destinationNode) {
+      points.push([destinationNode.lat, destinationNode.lon]);
+    }
+
+    if (showOptimalRoute && optimalRoute) {
+      points.push(...(optimalRoute.coordinates as [number, number][]));
+    }
+
+    if (showDirectRoute && directRoute) {
+      points.push(...(directRoute.coordinates as [number, number][]));
+    }
+
+    if (points.length < 2) {
       return;
     }
 
-    const bounds: [[number, number], [number, number]] = [
-      [originNode.coordinate.lat, originNode.coordinate.lon],
-      [destinationNode.coordinate.lat, destinationNode.coordinate.lon],
-    ];
-
-    map.fitBounds(bounds, {
-      padding: [50, 50],
-    });
-  }, [map, originNode, destinationNode]);
+    map.fitBounds(points as LatLngBoundsExpression, { padding: [72, 72], maxZoom: 15 });
+  }, [map, originNode, destinationNode, optimalRoute, directRoute, showOptimalRoute, showDirectRoute]);
 
   return null;
 }
@@ -159,21 +216,20 @@ function MapClickHandler({
         return;
       }
 
-      if (originNode && destinationNode) {
-        return;
-      }
-
       const nearestNode = findNearestNode(
         event.latlng.lat,
         event.latlng.lng,
         demoGraph.nodes
       );
 
+      if (nearestNode.type === "charging") {
+        return;
+      }
+
       if (activeField === "origin") {
         if (nearestNode.id === destinationNode?.id) {
           return;
         }
-
         onSelectOrigin(nearestNode);
         return;
       }
@@ -182,7 +238,6 @@ function MapClickHandler({
         if (nearestNode.id === originNode?.id) {
           return;
         }
-
         onSelectDestination(nearestNode);
       }
     },
@@ -191,30 +246,47 @@ function MapClickHandler({
   return null;
 }
 
-function getEnergyLabelForEdge(
-  edge: DemoEdge,
-  energyLabels: EdgeEnergyLabel[]
-): EdgeEnergyLabel | undefined {
-  return energyLabels.find((label) => label.edge_id === edge.id);
-}
-
 export default function MapCanvas({
   activeField,
   originNode,
   destinationNode,
   optimalRoute,
   directRoute,
+  showOptimalRoute,
+  showDirectRoute,
   isLoading,
   onSelectOrigin,
   onSelectDestination,
 }: MapCanvasProps) {
   const [demoGraph, setDemoGraph] = useState<DemoGraph | null>(null);
-  const [labelsVisible, setLabelsVisible] = useState(true);
+  const [labelsVisible, setLabelsVisible] = useState(false);
 
   const chargingIcon = useMemo(() => createChargingIcon(), []);
+  const nearestChargingIcon = useMemo(() => createNearestChargingIcon(), []);
   const routeChargingIcon = useMemo(() => createRouteChargingIcon(), []);
 
+  const batteryWarning =
+    (optimalRoute?.warnings ?? []).find((w) => w.code.startsWith("BATTERY_INSUFFICIENT")) ??
+    (directRoute?.warnings ?? []).find((w) => w.code.startsWith("BATTERY_INSUFFICIENT")) ??
+    null;
+
+  const highlightedStationName =
+    (batteryWarning?.params?.name as string | undefined) ?? null;
+
   const optimalEnergyLabels = optimalRoute?.edge_energy_labels ?? [];
+  const optimalEdges = useMemo(
+    () => getRouteEdges(optimalRoute, demoGraph),
+    [optimalRoute, demoGraph]
+  );
+  const directEdges = useMemo(
+    () => getRouteEdges(directRoute, demoGraph),
+    [directRoute, demoGraph]
+  );
+  const activeEdgeIds = useMemo(() => {
+    if (showOptimalRoute) return new Set(optimalEdges.map(getEdgeId));
+    if (showDirectRoute) return new Set(directEdges.map(getEdgeId));
+    return new Set<string>();
+  }, [showOptimalRoute, showDirectRoute, optimalEdges, directEdges]);
 
   useEffect(() => {
     async function loadDemoGraph() {
@@ -236,7 +308,7 @@ export default function MapCanvas({
       <TileLayer
         attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap contributors'
         url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-        opacity={0.75}
+        opacity={0.88}
       />
 
       <ZoomLabelController onZoomVisibilityChange={setLabelsVisible} />
@@ -244,6 +316,10 @@ export default function MapCanvas({
       <FitBoundsController
         originNode={originNode}
         destinationNode={destinationNode}
+        optimalRoute={optimalRoute}
+        directRoute={directRoute}
+        showOptimalRoute={showOptimalRoute}
+        showDirectRoute={showDirectRoute}
       />
 
       <MapClickHandler
@@ -258,66 +334,108 @@ export default function MapCanvas({
 
       {demoGraph?.edges.map((edge) => {
         const middlePoint = getEdgeMiddlePoint(edge.geometry);
-        const energyLabel = getEnergyLabelForEdge(edge, optimalEnergyLabels);
+        const energyLabel = showOptimalRoute
+          ? getEnergyLabelForEdge(edge, optimalEnergyLabels)
+          : undefined;
 
         return (
-          <div key={edge.id}>
+          <div key={getEdgeId(edge)}>
             <Polyline
-              positions={edge.geometry.map(toLatLng)}
+              positions={edge.geometry as [number, number][]}
               pathOptions={{
-                color: "white",
-                weight: 1,
-                opacity: 0.2,
+                color: "#d4d4d8",
+                weight: 2,
+                opacity: 0.34,
               }}
             />
 
+            {edge.source < edge.target && labelsVisible && activeEdgeIds.has(getEdgeId(edge)) && (
             <Marker
-              position={toLatLng(middlePoint)}
+              position={middlePoint}
               icon={createDistanceLabel(
-                edge.distance_m,
-                labelsVisible,
-                energyLabel?.energy_wh
+                edge.length_km * 1000,
+                true,
+                energyLabel?.energy_kwh
               )}
               interactive={false}
             />
+            )}
           </div>
         );
       })}
 
-      {optimalRoute &&
-        demoGraph &&
-        optimalRoute.edge_energy_labels.map((label) => {
-          const edge = demoGraph.edges.find(
-            (demoEdge) => demoEdge.id === label.edge_id
-          );
-
-          if (!edge) {
-            return null;
-          }
-
-          return (
+      {showDirectRoute &&
+        directRoute &&
+        (directEdges.length > 0 ? (
+          directEdges.map((edge) => (
             <Polyline
-              key={`optimal-${label.edge_id}`}
-              positions={edge.geometry.map(toLatLng)}
+              key={`direct-${getEdgeId(edge)}`}
+              positions={edge.geometry as [number, number][]}
               pathOptions={{
-                color: "#22c55e",
+                color: "#f97316",
+                weight: 3,
+                opacity: 0.6,
+                dashArray: "8 6",
+              }}
+            />
+          ))
+        ) : directRoute.coordinates.length > 0 ? (
+          <Polyline
+            positions={directRoute.coordinates as [number, number][]}
+            pathOptions={{
+              color: "#f97316",
+              weight: 3,
+              opacity: 0.6,
+              dashArray: "8 6",
+            }}
+          />
+        ) : null)}
+
+      {showOptimalRoute &&
+        optimalRoute &&
+        (optimalEdges.length > 0 ? (
+          optimalEdges.map((edge) => (
+            <Polyline
+              key={`optimal-${getEdgeId(edge)}`}
+              positions={edge.geometry as [number, number][]}
+              pathOptions={{
+                color: "#00f59f",
                 weight: 6,
                 opacity: 0.95,
               }}
             />
+          ))
+        ) : optimalRoute.coordinates.length > 0 ? (
+          <Polyline
+            positions={optimalRoute.coordinates as [number, number][]}
+            pathOptions={{
+              color: "#00f59f",
+              weight: 6,
+              opacity: 0.95,
+            }}
+          />
+        ) : null)}
+
+      {showOptimalRoute &&
+        optimalRoute &&
+        demoGraph &&
+        optimalRoute.edge_energy_labels.map((label) => {
+          const edge = findEdgeById(demoGraph, label.edge_id);
+
+          if (!edge) return null;
+
+          return (
+            <Polyline
+              key={`energy-${label.edge_id}`}
+              positions={edge.geometry as [number, number][]}
+              pathOptions={{
+                color: "#a7ff5f",
+                weight: 10,
+                opacity: 0.34,
+              }}
+            />
           );
         })}
-
-      {directRoute && (
-        <Polyline
-          positions={directRoute.coordinates.map(toLatLng)}
-          pathOptions={{
-            color: "#ef4444",
-            weight: 4,
-            opacity: 0.85,
-          }}
-        />
-      )}
 
       {demoGraph?.nodes.map((node) => {
         const isOrigin = node.id === originNode?.id;
@@ -327,15 +445,21 @@ export default function MapCanvas({
           activeField === "destination" && node.id === originNode?.id;
 
         if (node.type === "charging" && !isSelected) {
+          const isNearest = node.name === highlightedStationName;
           return (
             <Marker
               key={node.id}
-              position={toLatLng(node.coordinate)}
-              icon={chargingIcon}
+              position={[node.lat, node.lon]}
+              icon={isNearest ? nearestChargingIcon : chargingIcon}
               opacity={isDisabledForDestination ? 0.35 : 1}
             >
-              <Tooltip direction="top" offset={[0, -8]}>
-                {node.label}
+              <Tooltip
+                direction="top"
+                offset={[0, -8]}
+                permanent={isNearest}
+              >
+                {node.name}
+                {isNearest ? " — En yakın şarj" : ""}
               </Tooltip>
             </Marker>
           );
@@ -344,26 +468,26 @@ export default function MapCanvas({
         return (
           <CircleMarker
             key={node.id}
-            center={toLatLng(node.coordinate)}
-            radius={isSelected ? 8 : 5}
+            center={[node.lat, node.lon]}
+            radius={isSelected ? 9 : 5}
             pathOptions={{
               color: isOrigin
-                ? "#22c55e"
+                ? "#00f59f"
                 : isDestination
-                ? "#ef4444"
-                : "white",
+                ? "#ff3b55"
+                : "rgba(255,255,255,0.92)",
               fillColor: isOrigin
-                ? "#22c55e"
+                ? "#00f59f"
                 : isDestination
-                ? "#ef4444"
-                : "transparent",
-              fillOpacity: isSelected ? 1 : 0,
-              weight: isSelected ? 3 : 2,
+                ? "#ff3b55"
+                : "rgba(8,8,10,0.72)",
+              fillOpacity: isSelected ? 1 : 0.65,
+              weight: isSelected ? 4 : 2,
               opacity: isDisabledForDestination ? 0.35 : 1,
             }}
           >
-            <Tooltip permanent={true} direction="top" offset={[0, -10]}>
-              {node.label}
+            <Tooltip permanent={isSelected} direction="top" offset={[0, -10]}>
+              {node.name}
               {isOrigin ? " — Origin" : ""}
               {isDestination ? " — Destination" : ""}
             </Tooltip>
@@ -371,27 +495,18 @@ export default function MapCanvas({
         );
       })}
 
-      {optimalRoute?.charging_stops.map((stop) => (
-        <Marker
-          key={`route-charging-${stop.id}`}
-          position={toLatLng(stop.coordinate)}
-          icon={routeChargingIcon}
-        >
-          <Popup>
-            <div>
+      {showOptimalRoute &&
+        optimalRoute?.charging_stops.map((stop) => (
+          <Marker
+            key={`route-charging-${stop.node_id}`}
+            position={[stop.lat, stop.lon]}
+            icon={routeChargingIcon}
+          >
+            <Popup>
               <strong>{stop.name}</strong>
-              <br />
-              Charging time: {stop.estimated_charging_time_min} min
-              {stop.connector_type && (
-                <>
-                  <br />
-                  Connector: {stop.connector_type}
-                </>
-              )}
-            </div>
-          </Popup>
-        </Marker>
-      ))}
+            </Popup>
+          </Marker>
+        ))}
     </MapContainer>
   );
 }

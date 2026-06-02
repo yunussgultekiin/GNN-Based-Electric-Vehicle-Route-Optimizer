@@ -1,20 +1,30 @@
 from fastapi import APIRouter
-import json
-from pathlib import Path
-from app.services.demo.graph_builder import build_demo_graph
+from app.services.demo.graph_builder import load_demo_graph_data, get_nodes_data
 
 router = APIRouter(prefix="/demo", tags=["Demo"])
-GRAPH_FILE = Path("data/demo_graph.json")
+
+def _get_graph_edges(graph_data: dict) -> list[dict]:
+    return graph_data.get("links") or graph_data.get("edges") or []
 
 @router.get("/graph")
 async def get_demo_graph():
-    if not GRAPH_FILE.exists():
-        build_demo_graph()
+    graph_data = load_demo_graph_data()
+    nodes_data = get_nodes_data()
+    nodes = list(nodes_data.values())
 
-    with open(GRAPH_FILE, "r", encoding="utf-8") as f:
-        graph_data = json.load(f)
+    edges = []
+    for edge in _get_graph_edges(graph_data):
+        source = int(edge["source"])
+        target = int(edge["target"])
+
+        edges.append({
+            "source": source,
+            "target": target,
+            "length_km": round(float(edge.get("length", 0.0)), 4),
+            "geometry": edge.get("geometry", []),
+        })
 
     return {
-        "nodes": graph_data.get("nodes", []),
-        "edges": graph_data.get("links", [])
+        "nodes": nodes,
+        "edges": edges,
     }

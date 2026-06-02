@@ -40,19 +40,11 @@ export function findNearestNode(
 
   return nodes.reduce((nearestNode, currentNode) => {
     const nearestDistance = calculateHaversineDistanceMeters(
-      lat,
-      lon,
-      nearestNode.coordinate.lat,
-      nearestNode.coordinate.lon
+      lat, lon, nearestNode.lat, nearestNode.lon
     );
-
     const currentDistance = calculateHaversineDistanceMeters(
-      lat,
-      lon,
-      currentNode.coordinate.lat,
-      currentNode.coordinate.lon
+      lat, lon, currentNode.lat, currentNode.lon
     );
-
     return currentDistance < nearestDistance ? currentNode : nearestNode;
   });
 }

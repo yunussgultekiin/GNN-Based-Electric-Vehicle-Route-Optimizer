@@ -1,12 +1,8 @@
-"""EV energy consumption inference using the trained EnergyGCN model."""
-
 from __future__ import annotations
-
 import json
 import pickle
 from pathlib import Path
 from typing import Any, Union
-
 import numpy as np
 import torch
 import torch.nn as nn
@@ -14,14 +10,13 @@ import torch.nn.functional as F
 from sklearn.neighbors import NearestNeighbors
 from torch_geometric.nn import GCNConv
 
-
 _RAW_INPUT_COLS = (
     "length", "gradient", "temperature", "wind_speed",
     "speed_kmh", "battery_soc", "acceleration",
     "surface_type", "traffic_density", "weather_condition",
 )
 
-class EnergyGCN(nn.Module):
+class EnergyGNN(nn.Module):
     def __init__(self, in_channels, hidden_channels, num_layers, dropout):
         super().__init__()
         self.input_proj = nn.Linear(in_channels, hidden_channels)
@@ -62,7 +57,7 @@ class EnergyPredictor:
         self._feature_cols: list[str] = summary["feature_cols"]
         self._knn_cols: list[str] = summary["knn_graph_cols"]
 
-        self._model = EnergyGCN(
+        self._model = EnergyGNN(
             in_channels=summary["feature_dim"],
             hidden_channels=summary["hidden_channels"],
             num_layers=summary["num_layers"],

@@ -21,6 +21,10 @@ class PredictRequest(BaseModel):
 class PredictResponse(BaseModel):
     scores: list[float]
 
+@app.get("/health")
+def health() -> dict:
+    return {"status": "Healthy", "model_loaded": _predictor is not None}
+
 @app.post("/predict", response_model=PredictResponse)
 def predict(body: PredictRequest) -> PredictResponse:
     if not body.edge_features:

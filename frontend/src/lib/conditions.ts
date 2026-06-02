@@ -1,58 +1,32 @@
 import type { GlobalConditions } from "@/types/route";
 
-export type WeatherCondition = "sunny" | "cloudy" | "rainy" | "snowy";
-
-export type InitialConditions = {
-  temperature_c: number;
-  wind_speed_kmh: number;
-  weather_condition: WeatherCondition;
+const WEATHER_ICONS: Record<number, string> = {
+  1: "☀️",
+  2: "☁️",
+  3: "🌧️",
+  4: "❄️",
 };
 
-export function getWeatherIcon(condition: WeatherCondition): string {
-  const iconMap: Record<WeatherCondition, string> = {
-    sunny: "☀️",
-    cloudy: "☁️",
-    rainy: "🌧️",
-    snowy: "❄️",
-  };
+const WEATHER_LABELS: Record<number, string> = {
+  1: "Güneşli",
+  2: "Bulutlu",
+  3: "Yağmurlu",
+  4: "Karlı",
+};
 
-  return iconMap[condition];
+export function getWeatherIcon(condition: number): string {
+  return WEATHER_ICONS[condition] ?? "🌤️";
 }
 
-export function getWeatherLabel(condition: WeatherCondition): string {
-  const labelMap: Record<WeatherCondition, string> = {
-    sunny: "Güneşli",
-    cloudy: "Bulutlu",
-    rainy: "Yağmurlu",
-    snowy: "Karlı",
-  };
-
-  return labelMap[condition];
+export function getWeatherLabel(condition: number): string {
+  return WEATHER_LABELS[condition] ?? "Bilinmiyor";
 }
 
-export function getInitialConditions(): InitialConditions {
+export function getInitialConditions(): GlobalConditions {
   return {
-    temperature_c: 18,
-    wind_speed_kmh: 12,
-    weather_condition: "cloudy",
-  };
-}
-
-export function mapInitialConditionsToGlobalConditions(
-  conditions: InitialConditions
-): GlobalConditions {
-  return {
-    traffic_density: 0.45,
-    ambient_temperature_c: conditions.temperature_c,
-    wind_speed_kmh: conditions.wind_speed_kmh,
-    weather_condition:
-      conditions.weather_condition === "sunny"
-        ? "clear"
-        : conditions.weather_condition === "rainy"
-        ? "rain"
-        : conditions.weather_condition === "snowy"
-        ? "snow"
-        : "cloudy",
+    temperature: 18,
+    wind_speed: 12,
+    weather_condition: 2,
   };
 }
 
