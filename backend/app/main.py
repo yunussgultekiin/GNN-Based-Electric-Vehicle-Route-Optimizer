@@ -59,10 +59,18 @@ async def health_check(request: Request):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    logger.warning(f"Validation Error: {exc.errors()}")
+    try:
+        errors = exc.errors()
+        for err in errors:
+            ctx = err.get("ctx", {})
+            if "error" in ctx and isinstance(ctx["error"], Exception):
+                ctx["error"] = str(ctx["error"])
+    except Exception:
+        errors = [{"msg": str(exc)}]
+    logger.warning(f"Validation Error: {errors}")
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={"code": "INVALID_REQUEST_PARAMETERS", "errors": exc.errors()}
+        content={"code": "INVALID_REQUEST_PARAMETERS", "errors": errors}
     )
 
 @app.exception_handler(httpx.TimeoutException)

@@ -254,6 +254,7 @@ async def get_optimal_route(request: Request, payload: RouteRequest):
                 charging_stops=[nearest_node],
                 warnings=[warning],
             )
+            warning["params"]["distance_m"] = round(partial_data["distance_m"])
             return RouteResponse(
                 coordinates=partial_data["coordinates"],
                 route_edge_ids=partial_data["route_edge_ids"],

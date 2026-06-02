@@ -128,8 +128,9 @@ function getEnergyLabelForEdge(
   edge: DemoEdge,
   energyLabels: EdgeEnergyLabel[]
 ): EdgeEnergyLabel | undefined {
-  const edgeId = getEdgeId(edge);
-  return energyLabels.find((label) => label.edge_id === edgeId);
+  const fwd = `${edge.source}_${edge.target}`;
+  const rev = `${edge.target}_${edge.source}`;
+  return energyLabels.find((label) => label.edge_id === fwd || label.edge_id === rev);
 }
 
 function ZoomLabelController({
@@ -283,8 +284,10 @@ export default function MapCanvas({
     [directRoute, demoGraph]
   );
   const activeEdgeIds = useMemo(() => {
-    if (showOptimalRoute) return new Set(optimalEdges.map(getEdgeId));
-    if (showDirectRoute) return new Set(directEdges.map(getEdgeId));
+    const normalize = (e: DemoEdge) =>
+      e.source < e.target ? `${e.source}_${e.target}` : `${e.target}_${e.source}`;
+    if (showOptimalRoute) return new Set(optimalEdges.map(normalize));
+    if (showDirectRoute) return new Set(directEdges.map(normalize));
     return new Set<string>();
   }, [showOptimalRoute, showDirectRoute, optimalEdges, directEdges]);
 

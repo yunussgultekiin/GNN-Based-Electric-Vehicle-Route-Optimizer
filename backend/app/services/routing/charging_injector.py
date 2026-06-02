@@ -110,10 +110,14 @@ def inject_charging_stops(
     best_path: list[int] = []
     best_energy = float("inf")
     best_station = None
+    nearest_leg1: list[int] = []
 
     for station in candidates:
         path1, _ = find_min_energy_path(adjacency_list, source, station, energy_wh)
         path2, _ = find_min_energy_path(adjacency_list, station, target, energy_wh)
+
+        if path1 and not nearest_leg1:
+            nearest_leg1 = path1
 
         if path1 and path2:
             energy1 = _path_display_wh(path1, energy_wh)
@@ -121,7 +125,7 @@ def inject_charging_stops(
 
             if energy1 <= battery_range_wh and energy2 <= battery_range_wh:
                 total_route_energy = energy1 + energy2
-                if total_route_energy < best_energy and total_route_energy < initial_energy_wh:
+                if total_route_energy < best_energy:
                     best_energy = total_route_energy
                     best_path = path1[:-1] + path2
                     best_station = station
@@ -133,6 +137,8 @@ def inject_charging_stops(
             adjacency_list=adjacency_list,
             routing_weights=energy_wh,
         )
+        if nearest_leg1:
+            warning["params"]["distance_m"] = round(_path_length_km(nearest_leg1, adjacency_list) * 1000)
         warnings.append(warning)
         return [], 0.0, [], warnings
 
