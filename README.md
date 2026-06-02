@@ -56,14 +56,14 @@ Three independently containerized services communicate over HTTP:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  Frontend  —  Next.js 16 + React 19 + Leaflet + Tailwind CSS 4 │
-│  Port 3000                                                       │
+│  Frontend  —  Next.js 16 + React 19 + Leaflet + Tailwind CSS 4  │
+│  Port 3000                                                      │
 └──────────────────────────┬──────────────────────────────────────┘
                            │  REST / JSON
 ┌──────────────────────────▼──────────────────────────────────────┐
 │  Backend  —  FastAPI + Python 3.11                              │
-│  Port 8000                                                       │
-│                                                                  │
+│  Port 8000                                                      │
+│                                                                 │
 │  ┌──────────────────┐  ┌─────────────────┐  ┌────────────────┐  │
 │  │  routing/        │  │  services/      │  │  topology/     │  │
 │  │  dijkstra.py     │  │  gnn_client.py  │  │  osm_client.py │  │
@@ -72,14 +72,14 @@ Three independently containerized services communicate over HTTP:
 │  │  route_          │  │                 │  │                │  │
 │  │  builder.py      │  │                 │  │                │  │
 │  └──────────────────┘  └────────┬────────┘  └────────────────┘  │
-└───────────────────────────────  │  ──────────────────────────────┘
+└───────────────────────────────  │  ─────────────────────────────┘
                                   │  REST / JSON
 ┌─────────────────────────────────▼───────────────────────────────┐
 │  Energy Model  —  FastAPI + PyTorch + PyTorch Geometric         │
-│  Port 8001                                                       │
-│                                                                  │
+│  Port 8001                                                      │
+│                                                                 │
 │  EnergyGNN (GCNConv, 2 layers, hidden=64)                       │
-│  k-NN graph construction at inference time                       │
+│  k-NN graph construction at inference time                      │
 │  Input: 10 raw features → 17 features after engineering         │
 │  Output: energy score per edge (float)                          │
 └─────────────────────────────────────────────────────────────────┘
@@ -102,7 +102,7 @@ Three independently containerized services communicate over HTTP:
 | **Backend** | NetworkX | latest |
 | **Backend** | httpx | latest |
 | **Backend** | Pydantic v2 | latest |
-| **GNN Model** | PyTorch | 2.2.2 (CPU) |
+| **GNN Model** | PyTorch | 2.2.2 (CUDA — training) / 2.2.2+cpu (inference service) |
 | **GNN Model** | PyTorch Geometric | 2.5.3 |
 | **GNN Model** | scikit-learn | 1.8.0 |
 | **GNN Model** | NumPy | 1.26.4 |
@@ -360,29 +360,6 @@ Edge energy Wh: min=21 max=1928 mean=591 | edges=120
 ---
 
 ## Frontend — Next.js
-
-### Component Structure
-
-```
-src/
-├── app/
-│   ├── layout.tsx          # Root layout, global font/meta
-│   └── page.tsx            # Main page — state orchestration, API calls
-├── components/
-│   ├── map/
-│   │   ├── MapCanvas.tsx   # Leaflet map, node markers, route polylines
-│   │   └── RouteMap.tsx    # SSR-safe dynamic import wrapper for Leaflet
-│   └── ui/
-│       ├── SidePanel.tsx   # Left sidebar: inputs, stats, warnings, clock
-│       └── ConditionsPanel.tsx  # Dynamic weather/traffic conditions overlay
-├── lib/
-│   ├── api.ts              # Real API calls (fetchOptimalRoute, fetchDirectRoute, fetchDemoGraph)
-│   ├── mock_api.ts         # Static mock responses for offline development
-│   ├── conditions.ts       # Weather condition label helpers
-│   └── map_utils.ts        # Leaflet icon factories, color utilities
-└── types/
-    └── route.ts            # TypeScript types for all API shapes
-```
 
 ### Key Design Decisions
 
