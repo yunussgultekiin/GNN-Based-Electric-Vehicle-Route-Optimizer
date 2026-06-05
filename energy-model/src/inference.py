@@ -110,21 +110,18 @@ class EnergyPredictor:
         length = np.array(data["length"], dtype=np.float64)
         gradient = np.array(data["gradient"], dtype=np.float64)
         temperature = np.array(data["temperature"], dtype=np.float64)
-        wind_speed = np.array(data["wind_speed"], dtype=np.float64)
         speed_kmh = np.array(data["speed_kmh"], dtype=np.float64)
         acceleration = np.array(data["acceleration"], dtype=np.float64)
 
         data["gradient_sq"] = (gradient ** 2).tolist()
         data["length_x_gradient"] = (length * gradient).tolist()
         data["cold_penalty"] = np.maximum(0.0, -temperature).tolist()
-        data["wind_speed_sq"] = (wind_speed ** 2).tolist()
-        data["speed_sq"] = (speed_kmh ** 2).tolist()
         data["power_proxy"] = (acceleration * speed_kmh).tolist()
         data["speed_x_length"] = (speed_kmh * length).tolist()
 
         feature_matrix = np.column_stack(
             [np.array(data[col], dtype=np.float64) for col in self._feature_cols]
-        )  # shape: (N, 17)
+        )  # shape: (N, 15)
 
         feature_matrix = self._scaler.transform(feature_matrix)
 
